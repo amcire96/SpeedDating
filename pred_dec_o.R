@@ -55,3 +55,24 @@ g <- roc(dec_o ~ test_preds, data=test_set)
 plot(g)
 
 
+library(boot)
+
+thresholds <- seq(0, 1, 0.05)
+cv.error = rep(0, length(thresholds))
+
+for (i in c(0:length((thresholds)))) {
+  threshold <- thresholds[i]
+  glm.fit = glm(dec_o~., data = speed_dating_o, family = binomial)
+  cost_fcn = function (observed, predicted) {
+    bin_preds <- as.numeric(predicted >= threshold)
+    return(mean(bin_preds!=observed))
+  }
+  cv.error[i] = cv.glm(speed_dating_o, glm.fit, cost=cost_fcn, K=10)$delta[1]
+}
+
+best_threshold <- thresholds[which.min(cv.error)]
+best_accuracy <- 1 - cv.error[which.min(cv.error)]
+cv.error
+best_threshold
+best_accuracy
+

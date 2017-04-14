@@ -56,33 +56,22 @@ plot(g)
 
 
 # Cross Validation for different threshold values
-avg_accuracies <- rep(0,length(seq(0, 1, 0.05)))
 thresholds <- seq(0, 1, 0.05)
-for (threshold_index in (1:length(seq(0, 1, 0.05)))) {
-  filtered_speed_dating <- filtered_speed_dating[sample(nrow(filtered_speed_dating)),]
-  folds <- cut(seq(1, nrow(filtered_speed_dating)), breaks=10, labels=FALSE)
-  threshold <- thresholds[threshold_index]
-  print(threshold)
-  avg_acc <- 0
-  for (i in (1:10)) {
-    testIndices <- which(folds==i, arr.ind=TRUE)
-    test_set <- filtered_speed_dating[testIndices,]
-    train_set <- filtered_speed_dating[-testIndices,]
-    
-    log_reg_model <- glm(match~., data = train_set, family = binomial)
-    preds <- predict(log_reg_model, test_set, type = "response")
-    # summary(log_reg_model)
-    
-    
-    bin_preds <- as.numeric(preds >= threshold)
-    avg_acc = avg_acc + mean(bin_preds==test_set$match)
-    # table(bin_preds, test_set$match)
+cv.error = rep(0, length(thresholds))
+
+for (i in c(0:length((thresholds)))) {
+  threshold <- thresholds[i]
+  glm.fit = glm(match~., data = filtered_speed_dating, family = binomial)
+  cost_fcn = function (observed, predicted) {
+    bin_preds <- as.numeric(predicted >= threshold)
+    return(mean(bin_preds!=observed))
   }
-  avg_acc <- avg_acc / 10
-  avg_accuracies[threshold_index] = avg_acc
+  cv.error[i] = cv.glm(filtered_speed_dating, glm.fit, cost=cost_fcn, K=10)$delta[1]
 }
-best_threshold <- thresholds[which.max(avg_accuracies)]
-avg_accuracies
+best_threshold <- thresholds[which.min(cv.error)]
+best_accuracy <- 1 - cv.error[which.min(cv.error)]
+cv.error
 best_threshold
+best_accuracy
 
 

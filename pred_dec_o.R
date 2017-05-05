@@ -16,7 +16,7 @@ sum(is.na(speed_dating_o))
 speed_dating_o <- speed_dating_o[complete.cases(speed_dating_o), ]
 sum(is.na(speed_dating_o))
 
-# Check what fraction of couples actually matched
+# Check what fraction of pairs had the parter say "yes"
 sum(speed_dating_o$dec_o == 1) / nrow(speed_dating_o)
 
 sapply(speed_dating_o, class)

@@ -39,18 +39,18 @@ avg_accuracies <- rep(0, length(Ks))
 for (k_index in (1:length(Ks))) {
   set.seed(1)
   randomizer = sample(nrow(filtered_speed_dating_normal))
-  filtered_speed_dating_normal <- filtered_speed_dating_normal[randomizer,]
-  filtered_speed_dating_dec_o <- filtered_speed_dating_dec_o[randomizer,]
+  filtered_speed_dating_normal_random <- filtered_speed_dating_normal[randomizer,]
+  filtered_speed_dating_dec_o_random <- filtered_speed_dating_dec_o[randomizer,]
   folds <- cut(seq(1, nrow(filtered_speed_dating_normal)), breaks=10, labels=FALSE)
   k <- Ks[k_index]
   print(k)
   avg_acc <- 0
   for (i in (1:10)) {
     testIndices <- which(folds==i, arr.ind=TRUE)
-    test_set <- filtered_speed_dating_normal[testIndices,]
-    train_set <- filtered_speed_dating_normal[-testIndices,]
-    train.dec_o <- filtered_speed_dating_dec_o[-testIndices,]$dec_o
-    test.dec_o <- filtered_speed_dating_dec_o[testIndices,]$dec_o
+    test_set <- filtered_speed_dating_normal_random[testIndices,]
+    train_set <- filtered_speed_dating_normal_random[-testIndices,]
+    train.dec_o <- filtered_speed_dating_dec_o_random[-testIndices,]$dec_o
+    test.dec_o <- filtered_speed_dating_dec_o_random[testIndices,]$dec_o
     
     knn.pred=knn(train_set,test_set,train.dec_o,k=k)
     print(table(knn.pred,test.dec_o))
@@ -63,3 +63,15 @@ best_k <- Ks[which.max(avg_accuracies)]
 avg_accuracies
 best_k
 plot(Ks, avg_accuracies, main="Cross Validation Accuracies for Different K values", xlab="k", ylab="Acc", type="b")
+
+
+# ROC Curve
+train_ind <- sample(1:nrow(filtered_speed_dating_normal), .8*nrow(filtered_speed_dating_normal))
+train_set <- filtered_speed_dating_normal[train_ind, ]
+test_set <- filtered_speed_dating_normal[-train_ind, ]
+train_dec_o <- filtered_speed_dating_dec_o[train_ind, ]
+test_dec_o <- filtered_speed_dating_dec_o[-train_ind, ]
+knn.pred_prob <- attr(knn(train_set, test_set, train_dec_o$dec_o, k=18, prob=TRUE), "prob")
+library(pROC)
+g <- roc(test_dec_o$dec_o, knn.pred_prob)
+plot(g)

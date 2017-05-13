@@ -3,7 +3,7 @@ library(class)
 
 # set.seed(1)
 
-Speed_Dating_Data <- read_csv("~/Cornell Junior/Spring 2017/ORIE 4740/Final Project/Speed Dating Data.csv")
+# Speed_Dating_Data <- read_csv("~/Cornell Junior/Spring 2017/ORIE 4740/Final Project/Speed Dating Data.csv")
 # View(Speed_Dating_Data)
 
 columns_kept <- c("gender", "match", "int_corr", "samerace", "age_o", "race_o", "race", "imprace")
